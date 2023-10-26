@@ -1,10 +1,8 @@
 import re
-import stanza
 import sqlite3
 con = sqlite3.connect('textbase2.db', check_same_thread=False)
 cur = con.cursor()
 
-stanza_pipeline = stanza.Pipeline("ru")
 
 
 def find_quote(search_word):
@@ -54,8 +52,13 @@ def find_tag(search_tag):
 
 def find_word(search_word):
     search_word = search_word.lower()
-    stanza_proc = stanza_pipeline(search_word)
-    search_lemma = [word.lemma for sent in stanza_proc.sentences for word in sent.words]
+    segmenter = Segmenter()
+    doc = Doc(search_word)
+    doc.segment(segmenter)
+    doc.tag_morph(morph_tagger)
+    for token in doc.tokens:
+        token.lemmatize(morph_vocab)
+        search_lemma = [token.lemma]
     sentences = []
 
     word_lemma_find = """
